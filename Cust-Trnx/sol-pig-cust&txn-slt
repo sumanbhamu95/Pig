@@ -1,0 +1,81 @@
+history
+
+top 10 --customer count
+........................
+   a1 = load 'custs' using PigStorage(',') as (custid,fname:chararray,lname:chararray,age:long,profession);
+   a2 = group a1 by profession;
+   a3 = foreach a2 generate group,COUNT(a1.custid);
+   a4 = order a3 by $1 desc;
+   a5 = limit a4 10;
+
+
+
+find top 20 customer who have made the maximum total purchase
+..................................................................
+    a2 = load 'transa.txt' using PigStorage(',') as (id,dt:chararray,custid,amt:double,m1:chararray,m2:chararray,m3:chararray,m4:chararray,mode:chararray);
+
+    a3 = group a2 by custid;
+    a4 = foreach a3 generate group,SUM(a2.amt);
+    a5 = order a4 by $1 desc;
+    a6 = limit a5 10;
+
+	JOIN CUSTOMER AND TRANSACTION
+ 	.............................		
+    a7 = join a6 by $0,a1 by $0;
+
+	a8 = foreach a7 generate $0,$1,$3,$4,$5,$6;---here $--represents the previous data--i.e --a7
+
+
+
+Total Sales
+...................................................................
+
+ a2 = load 'transa.txt' using PigStorage(',') as (id,dt:chararray,custid,amt:double,m1:chararray,m2:chararray,m3:chararray,m4:chararray,mode:chararray);
+
+    a3 = group a2 all;
+    a4 = foreach a3 generate SUM(a2.amt);
+
+
+
+Total cash sales with %
+...............................................................
+
+a2 = load 'txns1.txt' using PigStorage(',') as (id,dt:chararray,custid,amt:double,m1:chararray,m2:chararray,m3:chararray,m4:chararray,mode:chararray);
+
+    a3 = group a2 all;
+    a4 = foreach a3 {
+	count = SUM (a2.amt);
+	count1 = filter a2 by mode == 'cash';
+	count2 = SUM(count1.amt);
+	generate group,(double)((count2*100)/count) as ss;
+	};
+
+
+credit sale %
+...............
+  
+a2 = load 'txns1.txt' using PigStorage(',') as (id,dt:chararray,custid,amt:double,m1:chararray,m2:chararray,m3:chararray,m4:chararray,mode:chararray);
+
+    a3 = group a2 all;
+    a4 = foreach a3 {
+	count = SUM (a2.amt);
+	count1 = filter a2 by mode == 'credit';
+	count2 = SUM(count1.amt);
+	generate group,(double)((count2*100)/count) as ss;
+	};
+...............................................................................................................................................
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
